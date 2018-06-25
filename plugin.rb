@@ -5,8 +5,19 @@
 
 enabled_site_setting :time_tracker_enabled
 
+register_asset "stylesheets/time-tracker.scss"
+
+require_relative "lib/time-tracker"
+
 after_initialize {
 
   Category.register_custom_field_type("enable_time_tracker", :boolean)
+
+  add_to_serializer(:topic_view, :time_tracker, false) {
+
+    tracker = TimeTracker::Tracker.new(object.id)
+    TimeTracker::TrackerSerializer.new(tracker, root: false, scope: scope).as_json
+
+  }
 
 }
