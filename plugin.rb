@@ -7,7 +7,8 @@ enabled_site_setting :time_tracker_enabled
 
 register_asset "stylesheets/time-tracker.scss"
 
-require_relative "lib/time-tracker"
+require_relative "lib/time_tracker"
+require_relative "lib/guardian"
 
 after_initialize {
 
@@ -15,7 +16,7 @@ after_initialize {
 
   add_to_serializer(:topic_view, :time_tracker, false) {
 
-    tracker = TimeTracker::Tracker.new(object.id)
+    tracker = TimeTracker::Tracker.new(id)
     TimeTracker::TrackerSerializer.new(tracker, root: false, scope: scope).as_json
 
   }

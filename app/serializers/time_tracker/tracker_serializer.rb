@@ -16,12 +16,18 @@ module TimeTracker
     end
 
     def timer_data
-      ActiveModel::ArraySerializer.new(object.data, each_serializer: TrackerDataSerializer).as_json
+      # don't make things complicated
+      object.data.map do |data|
+        TrackerDataSerializer.new(data, root: false, scope: scope)
+      end
     end
 
     def users
       user_ids = object.data.map { |data| data["user_id"] }
-      ActiveModel::ArraySerializer.new(User.where(id: user_ids), each_serializer: BasicUserSerializer).as_json
+
+      User.where(id: user_ids).all.map do |user|
+        BasicUserSerializer.new(user, root: false, scope: scope)
+      end
     end
 
   end

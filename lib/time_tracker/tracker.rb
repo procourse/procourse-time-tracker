@@ -1,10 +1,9 @@
 module TimeTracker
-
   class Tracker
 
     attr_reader :user_id, :topic_id
-
     attr_accessor :data
+    attr_accessor :guardian
 
     def initialize(topic_id, user_id = nil)
       @topic_id = topic_id
@@ -28,6 +27,7 @@ module TimeTracker
 
     def save_data
       set(data_key, @data)
+      publish_update
     end
 
     def timer
@@ -38,7 +38,8 @@ module TimeTracker
 
     def track_topic
       set(user_key, @topic_id)
-      set(timer_key, Time.now)
+      set(timer_key, Time.now.utc.iso8601)
+      publish_update
     end
 
     def stop_tracking_topic(topic_id)
@@ -49,9 +50,10 @@ module TimeTracker
       set(timer_key(topic_id), nil)
 
       data = get(data_key(topic_id)) || []
-      data << { start: start_time, end: Time.now, user_id: @user_id }
+      data << { start: start_time, end: Time.now.utc, user_id: @user_id }
 
       set(data_key, data)
+      publish_update
     end
 
     def get(key)
@@ -74,6 +76,13 @@ module TimeTracker
       "data_#{topic_id || @topic_id}"
     end
 
-  end
+    def publish_update
+      return if !@guardian
 
+      serialized_data = TrackerSerializer.new(self, root: false, scope: @guardian).as_json
+
+      MessageBus.publish("/time_tracker", { topic_id: @topic_id, data: serialized_data })
+    end
+
+  end
 end

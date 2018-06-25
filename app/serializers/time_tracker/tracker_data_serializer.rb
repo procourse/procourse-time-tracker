@@ -1,5 +1,5 @@
 module TimeTracker
-  class TrackerSerializer < ApplicationSerializer
+  class TrackerDataSerializer < ApplicationSerializer
 
     attributes :start, :end, :user_id, :can_edit
 

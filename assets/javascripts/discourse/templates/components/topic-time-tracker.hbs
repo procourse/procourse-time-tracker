@@ -1,0 +1,24 @@
+{{#if model.time_tracker.timer}}
+  {{time-tracker-clock time=model.time_tracker.timer}}
+
+  {{#if model.time_tracker.can_stop_timer}}
+    {{d-button
+      icon="stop"
+      class="btn-large btn-danger"
+      action="stop"
+      disabled=loading
+    }}
+  {{/if}}
+{{else}}
+  {{#if model.time_tracker.can_start_timer}}
+    <div class="timer-gap"></div>
+
+    {{d-button
+      icon="play"
+      class="btn-large btn-primary"
+      action="start"
+      label="time_tracker.start"
+      disabled=loading
+    }}
+  {{/if}}
+{{/if}}

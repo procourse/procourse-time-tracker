@@ -4,12 +4,35 @@
   display: flex;
   margin-right: 10px;
   max-width: 757px;
+  align-items: center;
 
   .timer {
-    flex: 1;
     text-align: right;
     font-size: 33px;
-    line-height: 37px;
+    line-height: 1;
     margin-right: 15px;
+  }
+
+  .timer, .timer-gap {
+    flex: 1;
+  }
+
+  .tt-num {
+    &.hours {
+      font-weight: bold;
+      color: $primary-high;
+    }
+
+    &.minutes {
+      color: $primary-high;
+    }
+
+    &.seconds {
+      color: $primary-medium;
+    }
+  }
+
+  .tt-sep {
+    color: $primary;
   }
 }
