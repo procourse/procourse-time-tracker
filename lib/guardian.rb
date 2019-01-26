@@ -12,12 +12,18 @@ class Guardian
 
   def can_stop_timer?(topic_id)
     return false if !authenticated?
+    
+    topic = Topic.includes(:category).where(id: topic_id).first
 
-    saved_user = PluginStoreRow.where(plugin_name: "time_tracker").where("key LIKE 'user_%'").where(value: topic_id.to_s).first
+    return false if ( !topic || !can_see_topic?(topic) || !topic.category || topic.private_message? )
 
-    return false if !saved_user
+    topic.category.custom_fields["enable_time_tracker"]
+  end
 
-    saved_user.key.split("_")[1].to_i == user.id
+  def can_view_timer?(user_id)
+    return false if !authenticated?
+
+    user_id == user.id
   end
 
   def can_edit_timer_data?(user_id)

@@ -1,87 +1,57 @@
+require 'togglv8'
+
 module TimeTracker
   class Tracker
 
     attr_reader :user_id, :topic_id
-    attr_accessor :data
     attr_accessor :guardian
 
     def initialize(topic_id, user_id = nil)
       @topic_id = topic_id
       @user_id  = user_id
-      @data     = get(data_key) || []
+      @topic    = Topic.find_by(id: @topic_id)
+      @topic_tags = @topic.topic_tags
+      @tags     = @topic_tags.map {|tag| Tag.find_by(id: tag.tag_id)}
+      @toggl_api = TogglV8::API.new(SiteSetting.temporary_api_key)
+      @user         = @toggl_api.me(all=true)
+      @workspaces   = @toggl_api.my_workspaces(@user)
+      @workspace_id = @workspaces.first['id']
+      
     end
-
+    
     def start
-      active_topic = get(user_key)
-
-      if !active_topic.blank?
-        stop_tracking_topic(active_topic.to_i)
+      begin
+        tag_names = @tags.collect { |t| t.name }
+        time_entry   = @toggl_api.start_time_entry({
+          'description' => "[#{@topic.id}] #{@topic.title}",
+          'wid' => @workspace_id,
+          'tags' => tag_names,
+          'start' => @toggl_api.iso8601((Time.now).to_datetime),
+          'created_with' => "ProCourse Time Tracker"
+        })
+        active_entry = {
+          :topic_id => @topic_id,
+          :toggl_entry_id => time_entry['id']
+        }
+        PluginStore.set("procourse_time_tracker", "active:" + @user_id.to_s, active_entry)
+        
+        return {:success => true, :message => {:tracker => active_entry}}
+      rescue
+        return {:success => false, :message => time_entry}
       end
-
-      track_topic
     end
-
+    
     def stop
-      stop_tracking_topic(@topic_id)
-    end
-
-    def save_data
-      set(data_key, @data)
-      publish_update
-    end
-
-    def timer
-      get(timer_key)
-    end
-
-    private
-
-    def track_topic
-      set(user_key, @topic_id)
-      set(timer_key, Time.now.utc.iso8601)
-      publish_update
-    end
-
-    def stop_tracking_topic(topic_id)
-      set(user_key, nil)
-
-      start_time = get(timer_key(topic_id))
-
-      set(timer_key(topic_id), nil)
-
-      data = get(data_key(topic_id)) || []
-      data << { start: start_time, end: Time.now.utc, user_id: @user_id }
-
-      set(data_key, data)
-      publish_update
-    end
-
-    def get(key)
-      PluginStore.get("time_tracker", key)
-    end
-
-    def set(key, value)
-      PluginStore.set("time_tracker", key, value)
-    end
-
-    def user_key
-      "user_#{@user_id}"
-    end
-
-    def timer_key(topic_id = nil)
-      "timer_#{topic_id || @topic_id}"
-    end
-
-    def data_key(topic_id = nil)
-      "data_#{topic_id || @topic_id}"
-    end
-
-    def publish_update
-      return if !@guardian
-
-      serialized_data = TrackerSerializer.new(self, root: false, scope: @guardian).as_json
-
-      MessageBus.publish("/time_tracker", { topic_id: @topic_id, data: serialized_data })
+      begin
+        active_entry = PluginStore.get("procourse_time_tracker", "active:" + @user_id.to_s)
+        stop_entry = @toggl_api.stop_time_entry(active_entry[:toggl_entry_id])
+        
+        PluginStore.set("procourse_time_tracker", "active:" + @user_id.to_s, [])
+        
+        return {:success => true, :message => []}
+      rescue
+        return {:success => false, :message => stop_entry}
+      end
     end
 
   end

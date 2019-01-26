@@ -2,4 +2,5 @@ en:
   js:
     time_tracker:
       start: "Start"
+      stop: "Stop"
       enable_time_tracker: "Enable time tracker"

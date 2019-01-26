@@ -1,9 +1,5 @@
-TimeTracker::Engine.routes.draw {
+TimeTracker::Engine.routes.draw do
   post "/start" => "tracker#start"
   post "/stop"  => "tracker#stop"
-  post "/edit"  => "tracker#edit"
-}
-
-Discourse::Application.routes.append {
-  mount TimeTracker::Engine, at: "/time-tracker"
-}
+  get "/get-timer"  => "tracker#get"
+end

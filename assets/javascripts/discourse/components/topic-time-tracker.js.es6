@@ -9,19 +9,14 @@ export default Ember.Component.extend({
 
   @on("didInsertElement")
   _setup() {
-    this.messageBus.subscribe("/time_tracker", (result) => {
-      if (result.topic_id == this.get("model.id")) {
-        this.set("model.time_tracker", result.data);
-      }
-    });
-  },
-
-  @on("willDestroyElement")
-  _unsubscribe() {
-    this.messageBus.unsubscribe("/time_tracker");
+    this.send("getTimer");
   },
 
   actions: {
+
+    getTimer() {
+      this._ajaxGet("get-timer");
+    },
 
     start() {
       this._ajax("start", { topic_id: this.get("model.id") });
@@ -42,7 +37,32 @@ export default Ember.Component.extend({
 
     this.set("loading", true);
 
-    ajax(this._endpoint(path), { type: "POST", data: data }).finally( () => this.set("loading", false) );
+    ajax(this._endpoint(path), { type: "POST", data: data }).then(() => {
+      debugger;
+      this.set("loading", false);
+      this.send("getTimer");
+    });
+  }, 
+
+  _ajaxGet(path) {
+    if (this.get("loading")) return;
+
+    this.set("loading", true);
+
+    ajax(this._endpoint(path)).then((result) => {
+      if (result.topic_id){
+        if (parseInt(result.topic_id) === this.get("model.id")){
+          this.set("currentActiveTimer", true);
+        }
+        else {
+          this.set("currentActiveTimer", false);
+        }
+      }
+      else {
+        this.set("currentActiveTimer", false);
+      }
+      this.set("loading", false) 
+    });
   }
 
 });

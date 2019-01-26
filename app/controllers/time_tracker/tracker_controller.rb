@@ -1,42 +1,38 @@
 module TimeTracker
   class TrackerController < ApplicationController
 
-    before_action :set_tracker
+    before_action :set_tracker, except: [:get]
 
     def start
       guardian.ensure_can_start_timer!(@tracker.topic_id)
 
-      @tracker.start
-
-      render json: success_json
+      response = @tracker.start
+      
+      if response[:success] == true
+        render json: response[:message] || []
+      else
+        render_json_error(response)        
+      end
     end
 
     def stop
       guardian.ensure_can_stop_timer!(@tracker.topic_id)
 
-      @tracker.stop
+      response = @tracker.stop
 
-      render json: success_json
+      if response[:success] == true
+        render json: response[:message] || []
+      else
+        render_json_error(response)        
+      end
     end
 
-    def edit
-      params.require(:index)
+    def get
+      guardian.ensure_can_view_timer!(current_user.id)
+      active_timer = PluginStore.get("procourse_time_tracker", "active:" + current_user.id.to_s) || []
 
-      idx = params[:index]
-      data = @tracker.data[idx]
-
-      guardian.ensure_can_edit_timer_data!(data["user_id"])
-
-      ["start", "end"].each do |k|
-        if params[k].present?
-          data[k] = params[k]
-        end
-      end
-
-      @tracker.data[idx] = data
-      @tracker.save_data
-
-      render_serialized @tracker, TrackerSerializer, root: false, scope: guardian
+      # TODO - check Toggl and compare to active_timer, true up
+      render json: active_timer || []
     end
 
     private

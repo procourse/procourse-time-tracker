@@ -2,3 +2,6 @@ plugins:
   time_tracker_enabled:
     default: true
     client: true
+  temporary_api_key:
+    default: ""
+    client: false
