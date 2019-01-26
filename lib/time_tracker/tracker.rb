@@ -9,10 +9,13 @@ module TimeTracker
     def initialize(topic_id, user_id = nil)
       @topic_id = topic_id
       @user_id  = user_id
+      @user = User.find_by(id: @user_id)
+      @custom_fields = @user.custom_fields
+      @api_key = @custom_fields['toggl_api_key']
       @topic    = Topic.find_by(id: @topic_id)
       @topic_tags = @topic.topic_tags
       @tags     = @topic_tags.map {|tag| Tag.find_by(id: tag.tag_id)}
-      @toggl_api = TogglV8::API.new(SiteSetting.temporary_api_key)
+      @toggl_api = TogglV8::API.new(@api_key)
       @user         = @toggl_api.me(all=true)
       @workspaces   = @toggl_api.my_workspaces(@user)
       @workspace_id = @workspaces.first['id']
