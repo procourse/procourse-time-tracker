@@ -38,7 +38,6 @@ export default Ember.Component.extend({
     this.set("loading", true);
 
     ajax(this._endpoint(path), { type: "POST", data: data }).then(() => {
-      debugger;
       this.set("loading", false);
       this.send("getTimer");
     });
