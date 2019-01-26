@@ -29,7 +29,7 @@ module TimeTracker
 
     def get
       guardian.ensure_can_view_timer!(current_user.id)
-      active_timer = PluginStore.get("procourse_time_tracker", "active:" + current_user.id.to_s) || []
+      active_timer = get_store
 
       # TODO - check Toggl and compare to active_timer, true up
       render json: active_timer || []
@@ -44,6 +44,10 @@ module TimeTracker
 
       @tracker = Tracker.new(params[:topic_id], current_user.id)
       @tracker.guardian = guardian
+    end
+
+    def get_store
+      PluginStore.get("procourse_time_tracker", "active:" + current_user.id.to_s) || []
     end
 
   end

@@ -10,16 +10,13 @@ module TimeTracker
       @topic_id = topic_id
       @user_id  = user_id
       @user = User.find_by(id: @user_id)
-      @custom_fields = @user.custom_fields
-      @api_key = @custom_fields['toggl_api_key']
-      @topic    = Topic.find_by(id: @topic_id)
-      @topic_tags = @topic.topic_tags
-      @tags     = @topic_tags.map {|tag| Tag.find_by(id: tag.tag_id)}
+      @api_key = @user.custom_fields['toggl_api_key']
+      @topic = Topic.find_by(id: @topic_id)
+      @tags = @topic.topic_tags.map {|tag| Tag.find_by(id: tag.tag_id)}
       @toggl_api = TogglV8::API.new(@api_key)
-      @user         = @toggl_api.me(all=true)
-      @workspaces   = @toggl_api.my_workspaces(@user)
+      @toggl_user = @toggl_api.me(all=true)
+      @workspaces = @toggl_api.my_workspaces(@toggl_user)
       @workspace_id = @workspaces.first['id']
-      
     end
     
     def start
@@ -36,7 +33,8 @@ module TimeTracker
           :topic_id => @topic_id,
           :toggl_entry_id => time_entry['id']
         }
-        PluginStore.set("procourse_time_tracker", "active:" + @user_id.to_s, active_entry)
+
+        set_store(active_entry)
         
         return {:success => true, :message => {:tracker => active_entry}}
       rescue
@@ -46,15 +44,25 @@ module TimeTracker
     
     def stop
       begin
-        active_entry = PluginStore.get("procourse_time_tracker", "active:" + @user_id.to_s)
+        active_entry = get_store
         stop_entry = @toggl_api.stop_time_entry(active_entry[:toggl_entry_id])
         
-        PluginStore.set("procourse_time_tracker", "active:" + @user_id.to_s, [])
+        set_store(nil)
         
-        return {:success => true, :message => []}
+        return {:success => true, :message => nil}
       rescue
         return {:success => false, :message => stop_entry}
       end
+    end
+
+    private
+
+    def get_store
+      PluginStore.get("procourse_time_tracker", "active:" + @user_id.to_s) || []
+    end
+
+    def set_store(record)
+      PluginStore.set("procourse_time_tracker", "active:" + @user_id.to_s, record)
     end
 
   end
