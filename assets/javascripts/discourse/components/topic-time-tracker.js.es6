@@ -42,7 +42,7 @@ export default Ember.Component.extend({
       this.set("loading", false);
       this.send("getTimer");
     }).catch((e) => {
-      bootbox.alert(e);
+      bootbox.alert(e.errorThrown);
     });
   }, 
 
