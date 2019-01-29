@@ -1,10 +1,11 @@
+require_relative "../../../lib/time_tracker_guardian"
 module TimeTracker
   class TrackerController < ApplicationController
 
     before_action :set_tracker, except: [:get]
 
     def start
-
+      guardian.ensure_can_start_timer!(@tracker.topic_id, @tracker.user_id)
       response = @tracker.start
       
       if response[:success] == true
@@ -15,7 +16,7 @@ module TimeTracker
     end
 
     def stop
-
+      guardian.ensure_can_stop_timer!(@tracker.topic_id, @tracker.user_id)
       response = @tracker.stop
 
       if response[:success] == true
@@ -40,6 +41,7 @@ module TimeTracker
       params.require(:topic_id)
 
       @tracker = Tracker.new(params[:topic_id], current_user.id)
+      @tracker.guardian = guardian 
     end
 
     def get_store
