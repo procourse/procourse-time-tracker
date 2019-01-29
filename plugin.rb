@@ -10,7 +10,6 @@ register_svg_icon "stop" if respond_to?(:register_svg_icon)
 
 register_asset "stylesheets/time-tracker.scss"
 
-require_relative "lib/guardian"
 DiscoursePluginRegistry.serialized_current_user_fields << "toggl_api_key"
 
 gem 'awesome_print', '1.8.0'
