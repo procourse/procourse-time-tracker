@@ -4,7 +4,6 @@ module TimeTracker
     before_action :set_tracker, except: [:get]
 
     def start
-      guardian.ensure_can_start_timer!(@tracker.topic_id)
 
       response = @tracker.start
       
@@ -16,7 +15,6 @@ module TimeTracker
     end
 
     def stop
-      guardian.ensure_can_stop_timer!(@tracker.topic_id)
 
       response = @tracker.stop
 
@@ -28,7 +26,6 @@ module TimeTracker
     end
 
     def get
-      guardian.ensure_can_view_timer!(current_user.id)
       active_timer = get_store
 
       # TODO - check Toggl and compare to active_timer, true up
@@ -43,7 +40,6 @@ module TimeTracker
       params.require(:topic_id)
 
       @tracker = Tracker.new(params[:topic_id], current_user.id)
-      @tracker.guardian = guardian
     end
 
     def get_store
