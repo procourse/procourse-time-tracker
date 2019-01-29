@@ -1,5 +1,6 @@
 import { on } from "ember-addons/ember-computed-decorators";
 import { ajax } from "discourse/lib/ajax";
+import { popupAjaxError } from "discourse/lib/ajax-error";
 
 export default Ember.Component.extend({
 
@@ -40,6 +41,8 @@ export default Ember.Component.extend({
     ajax(this._endpoint(path), { type: "POST", data: data }).then(() => {
       this.set("loading", false);
       this.send("getTimer");
+    }).catch((e) => {
+      bootbox.alert(e);
     });
   }, 
 

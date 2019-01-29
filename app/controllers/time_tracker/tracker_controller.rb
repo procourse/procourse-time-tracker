@@ -1,11 +1,10 @@
-require_relative "../../../lib/time_tracker_guardian"
 module TimeTracker
   class TrackerController < ApplicationController
 
     before_action :set_tracker, except: [:get]
 
     def start
-      guardian.ensure_can_start_timer!(@tracker.topic_id, @tracker.user_id)
+      guardian.ensure_can_start_timer!(@tracker.topic_id)
       response = @tracker.start
       
       if response[:success] == true
@@ -16,7 +15,7 @@ module TimeTracker
     end
 
     def stop
-      guardian.ensure_can_stop_timer!(@tracker.topic_id, @tracker.user_id)
+      guardian.ensure_can_stop_timer!(@tracker.topic_id)
       response = @tracker.stop
 
       if response[:success] == true
@@ -40,8 +39,13 @@ module TimeTracker
 
       params.require(:topic_id)
 
-      @tracker = Tracker.new(params[:topic_id], current_user.id)
-      @tracker.guardian = guardian 
+      user_id = current_user.id
+      user = User.find_by(id: user_id)
+
+      raise Discourse::InvalidParameters.new("missing toggl_api_key") if user.custom_fields["toggl_api_key"] == ""
+
+      @tracker = Tracker.new(params[:topic_id], user_id)
+      @tracker.guardian = Guardian.new(user) 
     end
 
     def get_store

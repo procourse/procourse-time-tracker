@@ -9,4 +9,5 @@ module TimeTracker
     end
   end
 end
+require_relative "../../lib/time_tracker_guardian"
 require_relative "../../lib/time_tracker/tracker"

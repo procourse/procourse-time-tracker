@@ -9,7 +9,6 @@ register_svg_icon "stop" if respond_to?(:register_svg_icon)
 
 
 register_asset "stylesheets/time-tracker.scss"
-require_relative "lib/time_tracker_guardian"
 
 DiscoursePluginRegistry.serialized_current_user_fields << "toggl_api_key"
 
@@ -19,7 +18,10 @@ gem 'togglv8', '1.2.1'
 load File.expand_path('../lib/time_tracker/engine.rb', __FILE__)
 
 after_initialize {
-  
+  require_dependency 'guardian'
+  class ::Guardian
+    include TimeTrackerGuardian
+  end  
   
   Category.register_custom_field_type("enable_time_tracker", :boolean)
   User.register_custom_field_type("toggl_api_key", :text)

@@ -5,22 +5,14 @@ module TimeTracker
 
     attr_reader :user_id, :topic_id
     attr_accessor :guardian
-
     def initialize(topic_id, user_id = nil)
       @topic_id = topic_id
       @user_id  = user_id
-      @user = User.find_by(id: @user_id)
-      @api_key = @user.custom_fields['toggl_api_key']
-      @topic = Topic.find_by(id: @topic_id)
-      @tags = @topic.topic_tags.map {|tag| Tag.find_by(id: tag.tag_id)}
-      @toggl_api = TogglV8::API.new(@api_key)
-      @toggl_user = @toggl_api.me(all=true)
-      @workspaces = @toggl_api.my_workspaces(@toggl_user)
-      @workspace_id = @workspaces.first['id']
     end
     
     def start
       begin
+        set_vars
         tag_names = @tags.collect { |t| t.name }
         time_entry   = @toggl_api.start_time_entry({
           'description' => "[#{@topic.id}] #{@topic.title}",
@@ -44,6 +36,7 @@ module TimeTracker
     
     def stop
       begin
+        set_vars
         active_entry = get_store
         stop_entry = @toggl_api.stop_time_entry(active_entry[:toggl_entry_id])
         
@@ -56,6 +49,17 @@ module TimeTracker
     end
 
     private
+
+    def set_vars
+      @user = User.find_by(id: @user_id)
+      @api_key = @user.custom_fields['toggl_api_key']
+      @topic = Topic.find_by(id: @topic_id)
+      @tags = @topic.topic_tags.map {|tag| Tag.find_by(id: tag.tag_id)}
+      @toggl_api = TogglV8::API.new(@api_key)
+      @toggl_user = @toggl_api.me(all=true)
+      @workspaces = @toggl_api.my_workspaces(@toggl_user)
+      @workspace_id = @workspaces.first['id']
+    end
 
     def get_store
       PluginStore.get("procourse_time_tracker", "active:" + @user_id.to_s) || []
