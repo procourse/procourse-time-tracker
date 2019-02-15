@@ -1,1 +1,3 @@
-{{topic-time-tracker model=model}}
+{{#if model.enable_time_tracker}}
+  {{topic-time-tracker model=model}}
+{{/if}}
