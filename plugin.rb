@@ -12,6 +12,7 @@ register_svg_icon "clock" if respond_to?(:register_svg_icon)
 register_asset "stylesheets/time-tracker.scss"
 
 DiscoursePluginRegistry.serialized_current_user_fields << "toggl_api_key"
+DiscoursePluginRegistry.serialized_current_user_fields << "toggl_workspaces"
 
 gem 'awesome_print', '1.8.0'
 gem 'logger', '1.3.0'
@@ -43,14 +44,21 @@ after_initialize do
   add_to_serializer(:topic_view, :enable_time_tracker) { object.topic.can_track_time? }
 
   User.register_custom_field_type("toggl_api_key", :text)
-  
   register_editable_user_custom_field :toggl_api_key
+
+  User.register_custom_field_type("toggl_workspaces", :text)
+  register_editable_user_custom_field :toggl_workspaces
 
   require_dependency "user"
   if SiteSetting.time_tracker_enabled then
     add_to_serializer(:user, :toggl_api_key) {
       if scope.user
         object.custom_fields["toggl_api_key"]
+      end
+    }
+    add_to_serializer(:user, :toggl_workspaces) {
+      if scope.user
+        object.custom_fields["toggl_workspaces"]
       end
     }
   end
