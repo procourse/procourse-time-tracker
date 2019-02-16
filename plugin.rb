@@ -19,10 +19,6 @@ gem 'togglv8', '1.2.1'
 load File.expand_path('../lib/time_tracker/engine.rb', __FILE__)
 
 after_initialize do
-  require_dependency 'guardian'
-  class ::Guardian
-    include TimeTrackerGuardian
-  end  
   
   Category.register_custom_field_type("enable_time_tracker", :boolean)
   add_to_serializer(:basic_category, :enable_time_tracker) { object.time_tracker_enabled }

@@ -1,3 +1,28 @@
+.time-tracker-controls {
+  display: flex;
+  position: absolute;
+  right: 150px;
+  top: 3px;
+  .widget-link {
+    height: 35px;
+    width: 35px;
+  }
+  .timer-topic-link {
+    color: $header-primary;
+    margin: 0 5px 0 0;
+    position: relative;
+    top: 5px;
+  }
+  .btn-danger {
+    border-radius: 50em;
+    padding: 0px;
+    .d-icon-stop {
+      height: 20px;
+      position: relative;
+      top: 7px;
+    }
+  }
+}
 .time-tracker-topic-title {
   padding: 10px 0 0 0;
   width: 100%;

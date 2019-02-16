@@ -4,7 +4,6 @@ module TimeTracker
   class Tracker
 
     attr_reader :user_id, :topic_id
-    attr_accessor :guardian
     def initialize(topic_id, user_id = nil)
       @topic_id = topic_id
       @user_id  = user_id

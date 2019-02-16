@@ -4,7 +4,6 @@ module TimeTracker
     before_action :set_tracker, except: [:get]
 
     def start
-      guardian.ensure_can_start_timer!(@tracker.topic_id)
       response = @tracker.start
       
       if response[:success] == true
@@ -15,7 +14,6 @@ module TimeTracker
     end
 
     def stop
-      guardian.ensure_can_stop_timer!(@tracker.topic_id)
       response = @tracker.stop
 
       if response[:success] == true
@@ -36,7 +34,6 @@ module TimeTracker
 
     def set_tracker
       raise Discourse::NotAllowed.new if !current_user
-
       params.require(:topic_id)
 
       user_id = current_user.id
@@ -45,7 +42,6 @@ module TimeTracker
       raise Discourse::InvalidParameters.new("missing toggl_api_key") if user.custom_fields["toggl_api_key"] == ""
 
       @tracker = Tracker.new(params[:topic_id], user_id)
-      @tracker.guardian = Guardian.new(user) 
     end
 
     def get_store
