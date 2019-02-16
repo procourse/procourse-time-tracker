@@ -29,12 +29,16 @@ module TimeTracker
       # TODO - check Toggl and compare to active_timer, true up
       render json: active_timer || []
     end
+    def get_workspaces
+      response = @tracker.get_workspaces
+
+      render json: response || []
+    end
 
     private
 
     def set_tracker
       raise Discourse::NotAllowed.new if !current_user
-      params.require(:topic_id)
 
       user_id = current_user.id
       user = User.find_by(id: user_id)

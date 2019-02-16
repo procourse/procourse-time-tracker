@@ -1,3 +1,4 @@
+import { ajax } from "discourse/lib/ajax";
 export default {
 
     shouldRender({ model }, component) {
@@ -7,11 +8,13 @@ export default {
     setupComponent({ model }, component) {
       model.set("custom_fields.toggl_api_key", model.get("toggl_api_key"));
       model.set("custom_fields.toggl_workspaces", parseInt(model.get("toggl_workspaces")));
-      const workspaces = [
-        { name: "Test 1", value: 0 },
-	{ name: "Test 2", value: 1 }
-      ];
-      component.set("getWorkspaces", workspaces);
+      if (model.get("toggl_api_key") != "") {
+          ajax("/time-tracker/get-workspaces").then((result) => {
+	      const workspaces = result.tracker;
+	      component.set("workspaces", workspaces);
+          });
+      } 
+      else { component.set("noApiKey", true); }
     }
   
   };

@@ -46,18 +46,36 @@ module TimeTracker
         return {:success => false, :message => stop_entry}
       end
     end
-
+    
+    def get_workspaces
+      set_vars
+      workspace_list = []
+      if !@workspaces.nil?
+        @workspaces.each do |workspace| 
+          workspace_list.push({ name: workspace["name"], value: workspace["id"]})
+        end
+        workspace_list
+      end
+    end
     private
 
     def set_vars
       @user = User.find_by(id: @user_id)
       @api_key = @user.custom_fields['toggl_api_key']
-      @topic = Topic.find_by(id: @topic_id)
-      @tags = @topic.topic_tags.map {|tag| Tag.find_by(id: tag.tag_id)}
-      @toggl_api = TogglV8::API.new(@api_key)
-      @toggl_user = @toggl_api.me(all=true)
-      @workspaces = @toggl_api.my_workspaces(@toggl_user)
-      @workspace_id = @workspaces.first['id']
+      if @topic_id
+        @topic = Topic.find_by(id: @topic_id)
+        @tags = @topic.topic_tags.map {|tag| Tag.find_by(id: tag.tag_id)}
+      end
+      if @api_key
+        @toggl_api = TogglV8::API.new(@api_key)
+        @toggl_user = @toggl_api.me(all=true)
+        @workspaces = @toggl_api.my_workspaces(@toggl_user)
+        if @user.custom_fields['toggl_workspaces'].nil?
+          @workspace_id = @workspaces.first['id']
+        else
+          @workspace_id = @user.custom_fields['toggl_workspaces'] 
+        end
+      end
     end
 
     def get_store

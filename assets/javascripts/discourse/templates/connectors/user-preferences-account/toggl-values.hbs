@@ -6,11 +6,13 @@
           {{input type="text" class="input-xxlarge" value=model.custom_fields.toggl_api_key}}
         </label>
     </div>
+    {{#unless noApiKey}}
     <label class="control-label">Toggl Workspace</label>
     <div class="controls">
         <label class='text-label'>
-          {{combo-box valueAttribute="value" content=getWorkspaces value=model.custom_fields.toggl_workspaces}}
+          {{combo-box valueAttribute="value" content=workspaces value=model.custom_fields.toggl_workspaces}}
         </label>
     </div>
+    {{/unless}}
   </div>
 {{/if}}
