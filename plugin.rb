@@ -37,7 +37,7 @@ after_initialize do
   require_dependency 'topic'
   class ::Topic
     def can_track_time?
-      SiteSetting.time_tracker_enabled && category.time_tracker_enabled
+      SiteSetting.time_tracker_enabled && category && category.time_tracker_enabled
     end
   end 
   # Add to topic view serializer
