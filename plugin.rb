@@ -22,7 +22,11 @@ load File.expand_path('../lib/time_tracker/engine.rb', __FILE__)
 after_initialize do
   
   Category.register_custom_field_type("enable_time_tracker", :boolean)
-  add_to_serializer(:basic_category, :enable_time_tracker) { object.time_tracker_enabled }
+  ["enable_time_tracker"].each do |key|
+    Site.preloaded_category_custom_fields << key if Site.respond_to? :preloaded_category_custom_fields
+    add_to_serializer(:basic_category, key.to_sym) { object.custom_fields[key] }
+  end
+
   class ::Category
     def time_tracker_enabled
       return false unless SiteSetting.time_tracker_enabled
