@@ -12,24 +12,26 @@ describe TimeTracker::TrackerController do
   include_context 'dummy tracker'
 
   describe 'starting a timer' do
-    before(:each) do
-      @user = Fabricate(:user)
-      @topic = Fabricate(:topic)
-      tracker
-      sign_in(@user)
-    end
-    context 'provided an api key' do
-      it 'successfully starts the timer' do
-        @user.custom_fields["toggl_api_key"] = "testAPIKey"
-        @user.save
-        post '/time-tracker/start.json', params: { :topic_id => @topic.id }
-        expect(response.status).to eq(200)
+    context 'with a logged in user' do
+      before(:each) do
+        @user = Fabricate(:user)
+        @topic = Fabricate(:topic)
+        tracker
+        sign_in(@user)
       end
-    end
-    context 'without an api key' do
-      it 'should raise the right error' do
-        post '/time-tracker/start.json', params: { :topic_id => @topic.id }
-        expect(response.status).to eq(400)
+      context 'provided an api key' do
+        it 'successfully starts the timer' do
+          @user.custom_fields["toggl_api_key"] = "testAPIKey"
+          @user.save
+          post '/time-tracker/start.json', params: { :topic_id => @topic.id }
+          expect(response.status).to eq(200)
+        end
+      end
+      context 'without an api key' do
+        it 'should raise the right error' do
+          post '/time-tracker/start.json', params: { :topic_id => @topic.id }
+          expect(response.status).to eq(400)
+        end
       end
     end
   end
@@ -59,7 +61,36 @@ describe TimeTracker::TrackerController do
       end
     end
   end
-  describe 'getting a timer'
-  describe 'getting workspaces'
 
+  describe 'getting a timer' do
+    before(:each) do
+      @user = Fabricate(:user)
+      @topic = Fabricate(:topic)
+      @user.custom_fields["toggl_api_key"] = "testAPIKey"
+      @user.save
+      tracker
+      sign_in(@user)
+    end
+
+    it 'successfully retrieves the time entry' do
+      get '/time-tracker/get-timer.json'
+      expect(response.status).to eq(200)
+    end
+  end
+
+  describe 'getting workspaces' do
+    before(:each) do
+      @user = Fabricate(:user)
+      @topic = Fabricate(:topic)
+      @user.custom_fields["toggl_api_key"] = "testAPIKey"
+      @user.save
+      tracker
+      sign_in(@user)
+    end
+
+    it 'successfully retrieves the workspaces' do
+      get '/time-tracker/get-workspaces.json'
+      expect(response.status).to eq(200)
+    end
+  end
 end

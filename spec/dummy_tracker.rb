@@ -20,6 +20,10 @@ RSpec.shared_context "dummy tracker" do
           { :success => true, :message => nil }
         end
 
+        def get_workspaces
+          [{ name: 'test_workspace', value: 'workspaceID' }]
+        end
+
         def get_store
           PluginStore.get("procourse_time_tracker", "active:" + @user_id.to_s) || []
         end
