@@ -43,7 +43,7 @@ module TimeTracker
       user_id = current_user.id
       user = User.find_by(id: user_id)
 
-      raise Discourse::InvalidParameters.new("missing toggl_api_key") if user.custom_fields["toggl_api_key"] == ""
+      raise Discourse::InvalidParameters.new("missing toggl_api_key") if user.custom_fields["toggl_api_key"].nil? || user.custom_fields["toggl_api_key"] == ""
 
       @tracker = Tracker.new(params[:topic_id], user_id)
     end
