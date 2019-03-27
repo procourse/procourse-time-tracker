@@ -12,6 +12,17 @@ describe TimeTracker::TrackerController do
   include_context 'dummy tracker'
 
   describe 'starting a timer' do
+    context 'as an anonymous user' do
+      before(:each) do
+        @topic = Fabricate(:topic)
+        tracker
+      end
+      it 'should raise the right error' do
+        post '/time-tracker/start.json', params: { :topic_id => @topic.id }
+        expect(response.status).to eq(403)
+      end
+    end
+
     context 'with a logged in user' do
       before(:each) do
         @user = Fabricate(:user)

@@ -38,7 +38,7 @@ module TimeTracker
     private
 
     def set_tracker
-      raise Discourse::NotAllowed.new if !current_user
+      raise Discourse::InvalidAccess.new if !current_user
 
       user_id = current_user.id
       user = User.find_by(id: user_id)
